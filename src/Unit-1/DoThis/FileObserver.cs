@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Akka.Actor;
 
 namespace WinTail
@@ -51,7 +52,17 @@ namespace WinTail
         /// </summary>
         public void Dispose()
         {
-            _watcher.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            var watcher = Interlocked.Exchange(ref _watcher, null);
+            if (watcher != null)
+            {
+                watcher.Dispose();
+            }            
         }
 
         /// <summary>
